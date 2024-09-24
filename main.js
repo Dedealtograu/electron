@@ -1,4 +1,8 @@
+console.log('Processo Principal')
+console.log(`Electron: ${process.versions.electron}`)
+
 const { app, BrowserWindow, nativeTheme, Menu, shell } = require('electron')
+const path = require('node:path')
 
 const createWindow = () => {
     //nativeTheme.themeSource = 'light'
@@ -10,6 +14,7 @@ const createWindow = () => {
         //autoHideMenuBar: true,
         //titleBarStyle: 'hidden',
         webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true
         }
     })
@@ -35,6 +40,26 @@ const aboutWindow = () => {
     about.loadFile('./src/views/sobre.html')
 }
 
+// Janela secundaria
+const childWindow = () => {
+    const father = BrowserWindow.getFocusedWindow()
+    if (father) {
+        const child = new BrowserWindow({
+            width: 640,
+            height: 480,
+            icon: './src/public/img/pc.png',
+            autoHideMenuBar: true,
+            resizable: false,
+            parent: father,
+            modal: true,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        })
+        child.loadFile('./src/views/child.html')
+    }
+}
+
 app.whenReady().then(() => {
     createWindow()
     //aboutWindow()
@@ -57,6 +82,10 @@ const template = [
     {
         label: 'Arquivo',
         submenu: [
+            {
+                label: 'Janela Secundaria',
+                click: () => childWindow()
+            },
             {
                 label: 'Sair',
                 click: () => app.quit(),
