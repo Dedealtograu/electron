@@ -1,7 +1,7 @@
 console.log('Processo Principal')
 console.log(`Electron: ${process.versions.electron}`)
 
-const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain } = require('electron')
+const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = require('electron')
 const path = require('node:path')
 
 const createWindow = () => {
@@ -73,6 +73,40 @@ app.whenReady().then(() => {
     ipcMain.on('renderer-message', (event, message) => {
         console.log(`Mensagem recebida pelo renderer: ${message}`)
         event.reply('main-message', 'Hello from the main process!')
+    })
+
+    ipcMain.on('dialog-info', () => {
+        dialog.showMessageBox({
+            type: 'info',
+            title: 'Informação',
+            message: 'Teste de informação',
+            buttons: ['OK']
+        })
+    })
+
+    ipcMain.on('dialog-warning', () => {
+        dialog.showMessageBox({
+            type: 'warning',
+            title: 'Aviso!',
+            message: 'Confirma essa ação?',
+            buttons: ['Sim', 'Não'],
+            defaultId: 0
+        }).then(result => {
+            console.log(result)
+            if (result.response === 0) {
+                console.log('Confirmado!')
+            }
+        })
+    })
+
+    ipcMain.on('dialog-select', () => {
+        dialog.showOpenDialog({
+            properties: ['openDirectory']
+        }).then(result => {
+            console.log(result)
+        }).catch(err => {
+            console.log(err)
+        })
     })
 
     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
