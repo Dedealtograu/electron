@@ -1,7 +1,7 @@
 console.log('Processo Principal')
 console.log(`Electron: ${process.versions.electron}`)
 
-const { app, BrowserWindow, nativeTheme, Menu, shell } = require('electron')
+const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain } = require('electron')
 const path = require('node:path')
 
 const createWindow = () => {
@@ -63,6 +63,19 @@ const childWindow = () => {
 app.whenReady().then(() => {
     createWindow()
     //aboutWindow()
+
+    // IPC >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    ipcMain.on('open-child', () => {
+        childWindow()
+    })
+
+    ipcMain.on('renderer-message', (event, message) => {
+        console.log(`Mensagem recebida pelo renderer: ${message}`)
+        event.reply('main-message', 'Hello from the main process!')
+    })
+
+    //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
